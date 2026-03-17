@@ -74,7 +74,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: output-artifacts-visualization
-          path: public/reports/figures
+          path: public
 
       - name: Generate HTML page
         run: |
