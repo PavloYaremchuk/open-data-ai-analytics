@@ -1,0 +1,58 @@
+name: Python Modules CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Оберіть модуль для перевірки'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - data_load
+          - data_quality
+          - data_research
+          - visualization
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        module: [data_load, data_quality, data_research, visualization]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas scikit-learn matplotlib seaborn
+
+      - name: Run Module Script
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.module == 'all' || github.event.inputs.module == matrix.module }}
+        run: |
+          echo "Запускаємо модуль: ${{ matrix.module }}.py"
+          python src/${{ matrix.module }}.py > logs_${{ matrix.module }}.txt
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-artifacts-${{ matrix.module }}
+          path: |
+            logs_${{ matrix.module }}.txt
+            reports/figures/*.png
+          if-no-files-found: ignore
