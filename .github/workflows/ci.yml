@@ -1,5 +1,10 @@
 name: Python Modules CI
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 on:
   push:
     branches: [ "main" ]
@@ -56,3 +61,38 @@ jobs:
             logs_${{ matrix.module }}.txt
             reports/figures/*.png
           if-no-files-found: ignore
+
+    deploy-pages:
+      needs: build-and-test
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      runs-on: ubuntu-latest
+      environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
+      steps:
+        - name: Download Visualization Artifacts
+          uses: actions/download-artifact@v4
+          with:
+            name: output-artifacts-visualization
+            path: public/reports/figures
+
+        - name: Generate HTML page
+          run: |
+            echo "<!DOCTYPE html><html><head><title>HR Analytics Dashboard</title><style>body{font-family:sans-serif; text-align:center; background:#f4f4f9; padding:20px;} img{max-width:800px; width:100%; margin:20px; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1);}</style></head><body>" > public/index.html
+            echo "<h1>Аналітика звільнень працівників</h1>" >> public/index.html
+            echo "<img src='reports/figures/payment_tier_churn.png' alt='Payment Tier'>" >> public/index.html
+            echo "<img src='reports/figures/benched_churn.png' alt='Benched'>" >> public/index.html
+            echo "<img src='reports/figures/joining_year_churn.png' alt='Joining Year'>" >> public/index.html
+            echo "<p><i>Оновлено автоматично через GitHub Actions CI/CD</i></p>" >> public/index.html
+            echo "</body></html>" >> public/index.html
+
+        - name: Setup Pages
+          uses: actions/configure-pages@v5
+        - name: Upload artifact for Pages
+          uses: actions/upload-pages-artifact@v3
+          with:
+            path: 'public'
+        - name: Deploy to GitHub Pages
+          id: deployment
+          uses: actions/deploy-pages@v4
