@@ -12,11 +12,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
+        shell: cmd
         run: |
           python -m pip install --upgrade pip
           pip install pandas
 
       - name: Run Data Load
+        shell: cmd
         run: |
           echo "Цей код виконується прямо на моєму комп'ютері!"
           python src/data_load.py
