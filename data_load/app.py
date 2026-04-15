@@ -1,22 +1,23 @@
 import pandas as pd
-import os
+from sqlalchemy import create_engine
+import time
+
+print("Очікування бази даних")
+time.sleep(5)
+
+DB_URL = "postgresql://admin:adminpassword@db:5432/hr_analytics"
 
 
-def load_employee_data(file_path):
-    if not os.path.exists(file_path):
-        raise FileNotFoundError(f"Файл не знайдено: {file_path}.")
+def load_data():
+    print("1. Зчитування CSV файлу")
+    df = pd.read_csv("/data/Employee.csv")
 
-    df = pd.read_csv(file_path)
-    print(f"Дані успішно завантажено. Розмір датасету: {df.shape}")
+    print("2. Підключення до БД та створення таблиці")
+    engine = create_engine(DB_URL)
 
-    return df
+    df.to_sql(name='employees', con=engine, if_exists='replace', index=False)
+    print(f"Успішно завантажено {len(df)} записів у базу даних")
 
 
 if __name__ == "__main__":
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(current_dir)
-    data_path = os.path.join(project_root, "data", "raw", "Employee.csv")
-
-    dataset = load_employee_data(data_path)
-
-    print(dataset.head())
+    load_data()
