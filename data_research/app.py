@@ -2,6 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import json
 import time
+import numpy as np
 
 time.sleep(12)
 DB_URL = "postgresql://admin:adminpassword@db:5432/hr_analytics"
@@ -12,7 +13,7 @@ def research_data():
     engine = create_engine(DB_URL)
     df = pd.read_sql("SELECT * FROM employees", engine)
 
-    stats = df.describe().to_dict()
+    stats = df.describe(include='all').replace({np.nan: None}).to_dict()
 
     with open("/reports/research_summary.json", "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=4, ensure_ascii=False)

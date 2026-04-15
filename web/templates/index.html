@@ -9,6 +9,7 @@
         body { background-color: #f8f9fa; padding-top: 20px; }
         .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .plot-img { max-width: 100%; border-radius: 8px; }
+        .table-sm td, .table-sm th { font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -17,16 +18,38 @@
     <p class="text-center lead">Аналіз даних щодо працівників та причин їх звільнення.</p>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-lg-5">
+            <div class="card h-100">
                 <div class="card-header bg-success text-white">Результати перевірки якості</div>
                 <div class="card-body">
                     {% if quality %}
-                        <ul>
-                            <li><strong>Всього рядків:</strong> {{ quality.total_rows }}</li>
-                            <li><strong>Кількість дублікатів:</strong> {{ quality.duplicates_count }}</li>
-                            <li><strong>Пропуски (City):</strong> {{ quality.missing_values.get('city', 0) }}</li>
-                        </ul>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-secondary fs-6">Всього рядків: {{ quality.total_rows }}</span>
+                            <span class="badge bg-danger fs-6">Дублікатів: {{ quality.duplicates_count }}</span>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-bordered mt-2">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ознака</th>
+                                        <th>Тип даних</th>
+                                        <th>Пропуски</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for col, missing_count in quality.missing_values.items() %}
+                                    <tr>
+                                        <td><strong>{{ col }}</strong></td>
+                                        <td><code>{{ quality.data_types[col] }}</code></td>
+                                        <td class="{% if missing_count > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                            {{ missing_count }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% else %}
                         <p class="text-muted">Дані ще не згенеровано...</p>
                     {% endif %}
@@ -34,19 +57,64 @@
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-lg-7">
+            <div class="card h-100">
                 <div class="card-header bg-info text-white">Результати дослідження (Статистика)</div>
                 <div class="card-body">
                     {% if research %}
-                        <p><strong>Вік (Age):</strong>
-                           Сер: {{ research.age.mean | round(1) }},
-                           Мін: {{ research.age.min }},
-                           Макс: {{ research.age.max }}
-                        </p>
-                        <p><strong>Досвід роботи:</strong>
-                           Сер: {{ research.experience_in_current_domain.mean | round(1) }} років
-                        </p>
+                        <h6 class="text-primary fw-bold">Числові ознаки:</h6>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-hover table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ознака</th>
+                                        <th>Середнє</th>
+                                        <th>Медіана (50%)</th>
+                                        <th>Std (Відхил.)</th>
+                                        <th>Мін / Макс</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for col, stats in research.items() %}
+                                        {% if stats['mean'] is not none %}
+                                        <tr>
+                                            <td><strong>{{ col }}</strong></td>
+                                            <td>{{ stats['mean'] | round(2) }}</td>
+                                            <td>{{ stats['50%'] | round(2) }}</td>
+                                            <td>{{ stats['std'] | round(2) }}</td>
+                                            <td>{{ stats['min'] | round(0) }} / {{ stats['max'] | round(0) }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h6 class="text-primary fw-bold mt-3">Категорійні ознаки:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ознака</th>
+                                        <th>Унікальних</th>
+                                        <th>Найчастіше (Top)</th>
+                                        <th>Частота (Freq)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for col, stats in research.items() %}
+                                        {% if stats['unique'] is not none %}
+                                        <tr>
+                                            <td><strong>{{ col }}</strong></td>
+                                            <td>{{ stats['unique'] }}</td>
+                                            <td><span class="badge bg-secondary">{{ stats['top'] }}</span></td>
+                                            <td>{{ stats['freq'] }}</td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     {% else %}
                         <p class="text-muted">Дані ще не згенеровано...</p>
                     {% endif %}

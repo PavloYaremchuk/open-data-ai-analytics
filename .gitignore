@@ -2,5 +2,7 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 .env
-data/raw/
 .idea/
+reports/*.json
+plots/*.png
+data/*.csv
