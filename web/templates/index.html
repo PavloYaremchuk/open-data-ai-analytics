@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 20px; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .plot-img { max-width: 100%; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4 text-center text-primary">HR Analytics: Дашборд Проєкту</h1>
+    <p class="text-center lead">Аналіз даних щодо працівників та причин їх звільнення.</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">Результати перевірки якості</div>
+                <div class="card-body">
+                    {% if quality %}
+                        <ul>
+                            <li><strong>Всього рядків:</strong> {{ quality.total_rows }}</li>
+                            <li><strong>Кількість дублікатів:</strong> {{ quality.duplicates_count }}</li>
+                            <li><strong>Пропуски (City):</strong> {{ quality.missing_values.get('city', 0) }}</li>
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Дані ще не згенеровано...</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">Результати дослідження (Статистика)</div>
+                <div class="card-body">
+                    {% if research %}
+                        <p><strong>Вік (Age):</strong>
+                           Сер: {{ research.age.mean | round(1) }},
+                           Мін: {{ research.age.min }},
+                           Макс: {{ research.age.max }}
+                        </p>
+                        <p><strong>Досвід роботи:</strong>
+                           Сер: {{ research.experience_in_current_domain.mean | round(1) }} років
+                        </p>
+                    {% else %}
+                        <p class="text-muted">Дані ще не згенеровано...</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4 mb-3 border-bottom pb-2">Візуалізації</h3>
+    <div class="row">
+        <div class="col-md-6 text-center">
+            <div class="card p-3">
+                <h5>Розподіл звільнень за рівнем оплати</h5>
+                <img src="/plots/payment_tier_churn.png" class="plot-img" alt="Payment Tier Plot">
+            </div>
+        </div>
+        <div class="col-md-6 text-center">
+            <div class="card p-3">
+                <h5>Розподіл віку працівників</h5>
+                <img src="/plots/age_distribution.png" class="plot-img" alt="Age Distribution Plot">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
