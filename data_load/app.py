@@ -12,6 +12,9 @@ def load_data():
     print("1. Зчитування CSV файлу")
     df = pd.read_csv("/data/Employee.csv")
 
+    df.columns = ['education', 'joining_year', 'city', 'payment_tier', 'age',
+                  'gender', 'ever_benched', 'experience_in_current_domain', 'leave_or_not']
+
     print("2. Підключення до БД та створення таблиці")
     engine = create_engine(DB_URL)
 
