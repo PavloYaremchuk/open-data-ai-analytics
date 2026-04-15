@@ -1,5 +1,12 @@
 version: '3.8'
 
+networks:
+  hr_network:
+    driver: bridge
+
+volumes:
+  pgdata:
+
 services:
   db:
     image: postgres:15-alpine
@@ -13,6 +20,58 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - hr_network
 
-volumes:
-  pgdata:
+  data_load:
+    build: ./data_load
+    container_name: hr_data_load
+    depends_on:
+      - db
+    volumes:
+      - ./data:/data
+    networks:
+      - hr_network
+
+  data_quality_analysis:
+    build: ./data_quality_analysis
+    container_name: hr_quality
+    depends_on:
+      - db
+    volumes:
+      - ./reports:/reports
+    networks:
+      - hr_network
+
+  data_research:
+    build: ./data_research
+    container_name: hr_research
+    depends_on:
+      - db
+    volumes:
+      - ./reports:/reports
+    networks:
+      - hr_network
+
+  visualization:
+    build: ./visualization
+    container_name: hr_visualization
+    depends_on:
+      - db
+    volumes:
+      - ./plots:/plots
+    networks:
+      - hr_network
+
+  web:
+    build: ./web
+    container_name: hr_web
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    volumes:
+      - ./reports:/reports
+      - ./plots:/plots
+    networks:
+      - hr_network
