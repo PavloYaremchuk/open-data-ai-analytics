@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   type        = string
   description = "Фізичний регіон датацентру"
-  default     = "West Europe"
+  default     = "Sweden Central"
 }
 
 variable "admin_username" {
