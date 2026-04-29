@@ -76,3 +76,57 @@
 Щоб зупинити роботу всіх сервісів, натисніть `Ctrl + C` у терміналі або виконайте команду в новому вікні:
 
     docker compose down
+
+---
+
+## Інструкція із розгортання в хмарі (Microsoft Azure)
+
+Цей проєкт підтримує автоматизоване розгортання інфраструктури в хмарі за принципом Infrastructure as Code (IaC) з використанням Terraform та `cloud-init`.
+
+### 1. Запуск Azure Cloud Shell
+1. Авторизуйтесь на порталі [Microsoft Azure](https://portal.azure.com).
+2. Натисніть на іконку **`>_` (Cloud Shell)** у верхній навігаційній панелі.
+3. Оберіть середовище термінала **Bash**.
+4. Якщо ви відкриваєте Cloud Shell вперше, згенеруйте SSH-ключ командою: 
+   ```bash
+   ssh-keygen -m PEM -t rsa -b 4096 -N "" -f ~/.ssh/id_rsa
+5. Склонуйте цей репозиторій:
+   ```bash
+   git clone <https://github.com/PavloYaremchuk/open-data-ai-analytics.git>
+
+### 2. Виконання terraform apply
+1. Перейдіть у директорію з конфігураційними файлами Terraform:
+   ```bash
+   cd <open-data-ai-analytics>/infra/terraform
+2. Ініціалізуйте плагіни провайдера:
+   ```bash
+   terraform init
+3. Запустіть розгортання інфраструктури:
+   ```bash
+   terraform apply
+4. Перевірте план створення ресурсів, введіть yes та натисніть Enter. Дочекайтеся завершення (напис Apply complete!).
+
+### 3. Перевірка результату та завантаження даних
+1. В кінці розгортання Terraform виведе публічну IP-адресу вашого сервера в блоці Outputs.
+2. Зачекайте 3-5 хвилин, поки скрипт cloud-init автоматично встановить Docker, завантажить код та запустить контейнери.
+3. Додавання набору даних: Завантажте файл Employee.csv у Cloud Shell за допомогою кнопки Upload. Потім передайте його на віртуальну машину командою: 
+   ```bash
+   scp Employee.csv azureuser@<ваша_IP_адреса>:~
+4. Підключіться до сервера по SSH:
+   ```bash
+   ssh azureuser@<ваша_IP_адреса>
+5. Перенесіть дані в директорію проєкту та перезапустіть сервіси:
+   ```bash
+   sudo mv ~/Employee.csv /opt/hr_analytics/data/
+   cd /opt/hr_analytics
+   sudo docker compose down && sudo docker compose up -d
+6. Відкрийте браузер та перейдіть за адресою: http://<ваша_IP_адреса>:5000
+
+### 4. Видалення ресурсів
+1. Поверніться у термінал Cloud Shell у директорію з Terraform:
+   ```bash
+   cd ~/open-data-ai-analytics/infra/terraform
+2. Виконайте команду для видалення:
+   ```bash
+   terraform destroy
+3. Підтвердіть дію, ввівши yes. Дочекайтеся повідомлення Destroy complete!.

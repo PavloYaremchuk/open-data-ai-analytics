@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  resource_provider_registrations = "none"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -25,7 +26,7 @@ resource "azurerm_public_ip" "public_ip" {
   name                = "hr-public-ip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  allocation_method = "Static"
 }
 
 resource "azurerm_network_security_group" "nsg" {
@@ -80,7 +81,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   name                = "hr-analytics-vm"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_B1s"
+  size                = "Standard_D2s_v3"
   admin_username      = var.admin_username
 
   network_interface_ids = [
