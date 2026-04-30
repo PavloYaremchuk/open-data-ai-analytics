@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 import json
@@ -32,3 +32,7 @@ async def serve_plot(filename: str):
     if os.path.exists(plot_path):
         return FileResponse(plot_path)
     return {"error": "Графік не знайдено"}
+
+@app.get("/metrics")
+def get_metrics():
+    return Response(content="hr_app_status 1\n", media_type="text/plain")
