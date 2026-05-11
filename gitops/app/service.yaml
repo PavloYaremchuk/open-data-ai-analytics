@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: web-service
+  name: hr-web-service
   namespace: hr-analytics
 spec:
   type: LoadBalancer
   selector:
-    app: web-app
+    app: hr-web
   ports:
     - protocol: TCP
       port: 5000
