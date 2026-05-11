@@ -6,7 +6,7 @@ metadata:
   labels:
     app: hr-web
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: hr-web
@@ -20,3 +20,13 @@ spec:
         image: pavloyar/hr-web-app:v1
         ports:
         - containerPort: 5000
+        volumeMounts:
+        - name: reports-volume
+          mountPath: /reports
+        - name: plots-volume
+          mountPath: /plots
+      volumes:
+      - name: reports-volume
+        emptyDir: {}
+      - name: plots-volume
+        emptyDir: {}
